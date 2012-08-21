@@ -1,0 +1,57 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Edit Ticket" %}{% endblock %}
+
+{% block jsapi %}
+ google.load("maps","3",{other_params:"sensor=false&libraries=places"});
+{% endblock %}
+
+{% block readyscript %}
+ $(document).ready(function(){
+  var input = document.getElementById('id_location');
+  var autocomplete = new google.maps.places.Autocomplete(input);
+  google.maps.event.addListener(autocomplete, 'place_changed', function() {
+    var place = autocomplete.getPlace();
+    var lat = place.geometry.location.lat();
+    var lng = place.geometry.location.lng();
+    $('#id_lat').val(lat);
+    $('#id_lon').val(lng);
+    });
+    //Prevent submitting the form with enter key
+    $('#id_location').keypress(function(e){
+      if ( e.which == 13 ) return false;
+      //or...
+      if ( e.which == 13 ) e.preventDefault();
+    });
+  });
+{% endblock %}
+
+{% block helpdesk_body %}
+{% blocktrans %}<h2>Edit a Ticket</h2>
+
+<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
+
+<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.</p>{% endblocktrans %}
+
+<form method='post' action='./'>
+<fieldset>
+    <dl>
+        {% for field in form %}
+            {% if field.is_hidden %}
+                {{ field }}
+            {% else %}
+                <dt><label for='id_{{ field.name }}'>{{ field.label }}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
+                <dd>{{ field }}</dd>
+                {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}</label>
+            {% endif %}
+        {% endfor %}
+    </dl>
+    
+    <div class='buttons'>
+        <input type='submit' value='{% trans "Save Changes" %}' />
+    </div>
+</fieldset>
+
+{% csrf_token %}</form>
+{% endblock %}
