@@ -1,0 +1,4 @@
+cron:
+- description: gets jobs for each queue with a coordinate id
+  url: /helpdesk/tasks/coordinatesync
+  schedule: every 30 minutes
